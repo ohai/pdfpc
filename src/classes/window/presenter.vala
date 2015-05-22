@@ -211,7 +211,7 @@ namespace pdfpc.Window {
             // Initial font needed for the labels
             // We approximate the point size using pt = px * .75
             var font = Pango.FontDescription.from_string("Verdana");
-            font.set_size((int) Math.floor(bottom_height * 0.8 * 0.75) * Pango.SCALE);
+            font.set_size((int) Math.floor(bottom_height * 0.4 * 0.75) * Pango.SCALE);
 
             // The countdown timer is centered in the 90% bottom part of the screen
             // It takes 3/4 of the available width
