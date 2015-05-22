@@ -149,8 +149,8 @@ namespace pdfpc {
          * Create and return a PresenterWindow using the specified monitor
          * while displaying the given file
          */
-        private Window.Presenter create_presenter_window( Metadata.Pdf metadata, int monitor ) {
-            var presenter_window = new Window.Presenter( metadata, monitor, this.controller );
+        private Window.Presenter create_presenter_window( Metadata.Pdf metadata, int monitor, int width = -1, int height = -1 ) {
+            var presenter_window = new Window.Presenter( metadata, monitor, this.controller, width, height );
             //controller.register_controllable( presenter_window );
             presenter_window.set_cache_observer( this.cache_status );
 
@@ -206,14 +206,20 @@ namespace pdfpc {
             // parse size option
             // should be in the width:height format
 
-            int width = -1, height = -1;
+            int width_presentation = -1, height_presentation = -1;
+			int width_presenter = -1, height_presenter = -1;
             if (Options.size != null) {
-                int colonIndex = Options.size.index_of(":");
-
-                width = int.parse(Options.size.substring(0, colonIndex));
-                height = int.parse(Options.size.substring(colonIndex + 1));
-
-                if (width < 1 || height < 1) {
+				string[] sizes = Options.size.split(":");
+				if (sizes.length >= 2) {
+					width_presentation = int.parse(sizes[0]);
+					height_presentation = int.parse(sizes[1]);
+				}
+				if (sizes.length == 4) {
+					width_presenter = int.parse(sizes[2]);
+					height_presenter = int.parse(sizes[3]);
+				}
+				
+                if (width_presentation < 1 || height_presentation < 1) {
                     warning("Error: Failed to parse size\n");
                     Posix.exit(1);
 
@@ -253,21 +259,21 @@ namespace pdfpc {
                     presenter_monitor    = (screen.get_primary_monitor() + 1) % 2;
                 presentation_monitor = (presenter_monitor + 1) % 2;
                 this.presenter_window =
-                    this.create_presenter_window( metadata, presenter_monitor );
+				    this.create_presenter_window( metadata, presenter_monitor, width_presenter, height_presenter );
                 this.presentation_window =
-                    this.create_presentation_window( metadata, presentation_monitor, width, height );
+                    this.create_presentation_window( metadata, presentation_monitor, width_presentation, height_presentation );
             } else if (Options.windowed && !Options.single_screen) {
                 this.presenter_window =
-                    this.create_presenter_window( metadata, -1 );
+				    this.create_presenter_window( metadata, -1 , width_presenter, height_presenter);
                 this.presentation_window =
-                    this.create_presentation_window( metadata, -1, width, height );
+                    this.create_presentation_window( metadata, -1, width_presentation, height_presentation );
             } else {
                     if ( !Options.display_switch)
                         this.presenter_window =
-                            this.create_presenter_window( metadata, -1 );
+                            this.create_presenter_window( metadata, -1, width_presenter, height_presenter );
                     else
                         this.presentation_window =
-                            this.create_presentation_window( metadata, -1, width, height );
+                            this.create_presentation_window( metadata, -1, width_presentation, height_presentation );
             }
 
             // The windows are always displayed at last to be sure all caches have
